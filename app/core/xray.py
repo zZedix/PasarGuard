@@ -15,8 +15,8 @@ class XRayConfig(dict):
     def __init__(
         self,
         config: Union[dict, str, PosixPath] = {},
-        exclude_inbound_tags: list[str] = [],
-        fallbacks_inbound_tags: list[str] = [],
+        exclude_inbound_tags: set[str] | None = set(),
+        fallbacks_inbound_tags: set[str] | None = set(),
     ):
         """Initialize the XRay config."""
         if isinstance(config, str):
@@ -38,16 +38,20 @@ class XRayConfig(dict):
         super().__init__(config)
         self._validate()
 
+        if exclude_inbound_tags is None:
+            exclude_inbound_tags = set()
+        if fallbacks_inbound_tags is None:
+            fallbacks_inbound_tags = set()
+        exclude_inbound_tags.update(fallbacks_inbound_tags)
         self.exclude_inbound_tags = exclude_inbound_tags
+
         self._inbounds = []
         self._inbounds_by_tag = {}
         self._fallbacks_inbound = []
-        self._fallback_tags = []
         for tag in fallbacks_inbound_tags:
             inbound = self.get_inbound(tag)
             if inbound:
                 self._fallbacks_inbound.append(inbound)
-                self._fallback_tags.append(tag)
         self._resolve_inbounds()
 
     def _validate(self):
@@ -172,7 +176,7 @@ class XRayConfig(dict):
             settings["spx"] = tls_settings.get("SpiderX")
         except Exception:
             settings["spx"] = ""
-        
+
         settings["mldsa65Verify"] = tls_settings.get("mldsa65Verify")
 
     def _handle_network_settings(self, net: str, net_settings: dict, settings: dict, inbound_tag: str):
@@ -313,8 +317,6 @@ class XRayConfig(dict):
             return
 
         if inbound["tag"] in self.exclude_inbound_tags:
-            return
-        if inbound["tag"] in self._fallback_tags:
             return
 
         if not inbound.get("settings"):

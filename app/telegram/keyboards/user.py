@@ -133,4 +133,3 @@ class RandomUsername(InlineKeyboardBuilder):
             callback_data=CancelKeyboard.Callback(action=CancelAction.cancel),
         )
         self.adjust(1, repeat=True)
-

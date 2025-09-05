@@ -4,7 +4,7 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.proxy import ShadowsocksMethods, XTLSFlows
-from .validators import DiscordValidator, ListValidator, ProxyValidator, URLValidator
+from .validators import DiscordValidator, ProxyValidator, URLValidator
 
 
 TELEGRAM_TOKEN_PATTERN = r"^\d{8,12}:[A-Za-z0-9_-]{35}$"

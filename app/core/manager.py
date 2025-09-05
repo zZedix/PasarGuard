@@ -19,11 +19,8 @@ class CoreManager:
         self._inbounds_by_tag = {}
 
     @staticmethod
-    def validate_core(config: dict, fallbacks_inbounds: str, exclude_inbounds: str):
-        fallbacks_inbound_tags = fallbacks_inbounds.split(",") if fallbacks_inbounds else []
-        exclude_inbound_tags = exclude_inbounds.split(",") if exclude_inbounds else []
-
-        return XRayConfig(config, exclude_inbound_tags, fallbacks_inbound_tags)
+    def validate_core(config: dict, fallbacks_inbounds: set[str] | None, exclude_inbounds: set[str] | None):
+        return XRayConfig(config, exclude_inbounds, fallbacks_inbounds)
 
     async def update_inbounds(self):
         async with self._lock.writer_lock:

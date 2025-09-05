@@ -340,20 +340,14 @@ async def create_user_from_template_username(
         pass
 
     await state.set_state(forms.CreateUserFromTemplate.username)
-    msg = await event.message.answer(
-        Texts.enter_username,
-        reply_markup=RandomUsername(with_template=True).as_markup()
-    )
+    msg = await event.message.answer(Texts.enter_username, reply_markup=RandomUsername(with_template=True).as_markup())
     await state.update_data(template_id=callback_data.template_id, messages_to_delete=[msg.message_id])
 
 
 @router.message(forms.CreateUserFromTemplate.username)
 @router.callback_query(RandomUsername.Callback.filter(F.with_template))
 async def create_user_from_template_choose(
-        event: Message | CallbackQuery,
-        state: FSMContext,
-        db: AsyncSession,
-        admin: AdminDetails
+    event: Message | CallbackQuery, state: FSMContext, db: AsyncSession, admin: AdminDetails
 ):
     await delete_messages(event, state)
 
@@ -384,8 +378,7 @@ async def create_user_from_template_choose(
         await user_operations.get_validated_user(db, actual_username, admin)
         if isinstance(event, Message):
             msg = await event.reply(
-                Texts.username_already_exist,
-                reply_markup=RandomUsername(with_template=True).as_markup()
+                Texts.username_already_exist, reply_markup=RandomUsername(with_template=True).as_markup()
             )
             await add_to_messages_to_delete(state, msg)
         else:
