@@ -20,7 +20,7 @@ class CoreManager:
 
     @staticmethod
     def validate_core(config: dict, fallbacks_inbounds: set[str] | None, exclude_inbounds: set[str] | None):
-        return XRayConfig(config, exclude_inbounds, fallbacks_inbounds)
+        return XRayConfig(config, exclude_inbounds.copy(), fallbacks_inbounds.copy())
 
     async def update_inbounds(self):
         async with self._lock.writer_lock:

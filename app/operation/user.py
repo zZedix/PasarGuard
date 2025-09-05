@@ -58,7 +58,6 @@ logger = get_logger("user-operation")
 
 
 class UserOperation(BaseOperation):
-    
     @staticmethod
     async def generate_subscription_url(user: UserNotificationResponse):
         salt = secrets.token_hex(8)
@@ -86,7 +85,7 @@ class UserOperation(BaseOperation):
             await node_manager.remove_user(user)
 
         return user
-    
+
     async def create_user(self, db: AsyncSession, new_user: UserCreate, admin: AdminDetails) -> UserResponse:
         if new_user.next_plan is not None and new_user.next_plan.user_template_id is not None:
             await self.get_validated_user_template(db, new_user.next_plan.user_template_id)

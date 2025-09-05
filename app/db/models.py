@@ -591,8 +591,8 @@ class CoreConfig(Base):
     created_at: Mapped[dt] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.now(tz.utc), init=False)
     name: Mapped[str] = mapped_column(String(256))
     config: Mapped[Dict[str, Any]] = mapped_column(JSON(False))
-    exclude_inbound_tags: Mapped[Optional[set[str]]] = mapped_column(StringArray(2048), default=set)
-    fallbacks_inbound_tags: Mapped[Optional[set[str]]] = mapped_column(StringArray(2048), default=set)
+    exclude_inbound_tags: Mapped[Optional[set[str]]] = mapped_column(StringArray(2048), default_factory=set)
+    fallbacks_inbound_tags: Mapped[Optional[set[str]]] = mapped_column(StringArray(2048), default_factory=set)
 
 
 class NodeStat(Base):
