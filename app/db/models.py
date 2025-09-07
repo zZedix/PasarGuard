@@ -376,18 +376,12 @@ class ProxyHostSecurity(str, Enum):
     tls = "tls"
 
 
-ProxyHostALPN = Enum(
-    "ProxyHostALPN",
-    {
-        "none": "",
-        "h3": "h3",
-        "h2": "h2",
-        "http/1.1": "http/1.1",
-        "h3,h2,http/1.1": "h3,h2,http/1.1",
-        "h3,h2": "h3,h2",
-        "h2,http/1.1": "h2,http/1.1",
-    },
-)
+class ProxyHostALPN(str, Enum):
+    h1 = "http/1.1"
+    h2 = "h2"
+    h3 = "h3"
+
+
 ProxyHostFingerprint = Enum(
     "ProxyHostFingerprint",
     {
@@ -413,28 +407,25 @@ class ProxyHost(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
     remark: Mapped[str] = mapped_column(String(256), unique=False, nullable=False)
-    address: Mapped[str] = mapped_column(String(256), unique=False, nullable=False)
     port: Mapped[Optional[int]] = mapped_column(nullable=True)
     path: Mapped[Optional[str]] = mapped_column(String(256), unique=False, nullable=True)
-    sni: Mapped[Optional[str]] = mapped_column(String(1000), unique=False, nullable=True)
-    host: Mapped[Optional[str]] = mapped_column(String(1000), unique=False, nullable=True)
+    priority: Mapped[int] = mapped_column(nullable=False)
+    allowinsecure: Mapped[Optional[bool]] = mapped_column(nullable=True)
+    address: Mapped[set[str]] = mapped_column(StringArray(256), default_factory=set, unique=False, nullable=False)
+    sni: Mapped[Optional[set[str]]] = mapped_column(StringArray(1000), default_factory=set, unique=False, nullable=True)
+    host: Mapped[Optional[set[str]]] = mapped_column(
+        StringArray(1000), default_factory=set, unique=False, nullable=True
+    )
     inbound_tag: Mapped[Optional[str]] = mapped_column(
         String(256), ForeignKey("inbounds.tag", ondelete="SET NULL", onupdate="CASCADE"), nullable=True, init=False
     )
     inbound: Mapped[Optional["ProxyInbound"]] = relationship(back_populates="hosts", init=False)
-    priority: Mapped[int] = mapped_column(nullable=False)
-    allowinsecure: Mapped[Optional[bool]] = mapped_column(nullable=True)
     security: Mapped[ProxyHostSecurity] = mapped_column(
         SQLEnum(ProxyHostSecurity),
         unique=False,
         default=ProxyHostSecurity.inbound_default,
     )
-    alpn: Mapped[ProxyHostALPN] = mapped_column(
-        SQLEnum(ProxyHostALPN),
-        unique=False,
-        default=ProxyHostSecurity.none,
-        server_default=ProxyHostSecurity.none.name,
-    )
+    alpn: Mapped[Optional[list[ProxyHostALPN]]] = mapped_column(EnumArray(ProxyHostALPN, 14), default=list)
     fingerprint: Mapped[ProxyHostFingerprint] = mapped_column(
         SQLEnum(ProxyHostFingerprint),
         unique=False,

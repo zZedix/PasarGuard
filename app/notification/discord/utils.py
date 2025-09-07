@@ -12,7 +12,7 @@ def escape_md_user(user: UserNotificationResponse, by: str) -> tuple[str, str, s
 
 def escape_md_host(host: BaseHost, by: str) -> tuple[str, str, str, str]:
     """Escapes markdown special characters in host and by strings for Discord."""
-    return escape_ds_markdown_list((host.remark, host.address, host.inbound_tag, by))
+    return escape_ds_markdown_list((host.remark, host.address_str, host.inbound_tag, by))
 
 
 def escape_md_template(template: UserTemplateResponse, by: str) -> tuple[str, str, str, str]:

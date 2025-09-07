@@ -3,6 +3,7 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.db.models import ProxyHostALPN, ProxyHostFingerprint, ProxyHostSecurity, UserStatus
+from .validators import StringArrayValidator
 
 
 class XHttpModes(str, Enum):
@@ -178,14 +179,14 @@ class FormatVariables(dict):
 class BaseHost(BaseModel):
     id: int | None = Field(default=None)
     remark: str
-    address: str
+    address: set[str] = Field(default_factory=set)
     inbound_tag: str | None = Field(default=None)
     port: int | None = Field(default=None)
-    sni: str | None = Field(default=None)
-    host: str | None = Field(default=None)
+    sni: set[str] | None = Field(default_factory=set)
+    host: set[str] | None = Field(default_factory=set)
     path: str | None = Field(default=None)
     security: ProxyHostSecurity = ProxyHostSecurity.inbound_default
-    alpn: ProxyHostALPN = ProxyHostALPN.none
+    alpn: set[ProxyHostALPN] | None = Field(default_factory=set)
     fingerprint: ProxyHostFingerprint = ProxyHostFingerprint.none
     allowinsecure: bool | None = Field(default=None)
     is_disabled: bool = Field(default=False)
@@ -197,10 +198,16 @@ class BaseHost(BaseModel):
     random_user_agent: bool = Field(default=False)
     use_sni_as_host: bool = Field(default=False)
     priority: int
-    status: set[UserStatus] = Field(default_factory=set)
+    status: set[UserStatus] | None = Field(default_factory=set)
     ech_config_list: str | None = Field(default=None)
 
     model_config = ConfigDict(from_attributes=True)
+
+    @property
+    def address_str(self) -> str:
+        if self.address:
+            return ",".join(self.address)
+        return ""
 
 
 class CreateHost(BaseHost):
@@ -215,9 +222,8 @@ class CreateHost(BaseHost):
 
     @field_validator("address", mode="after")
     def validate_address(cls, v):
-        try:
-            v.format_map(FormatVariables())
-        except ValueError:
-            raise ValueError("Invalid formatting variables")
+        return StringArrayValidator.len_check(v, 256)
 
-        return v
+    @field_validator("sni", "host", mode="after")
+    def validate_sets(cls, v: set):
+        return StringArrayValidator.len_check(v, 1000)
