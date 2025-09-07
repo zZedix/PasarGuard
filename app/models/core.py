@@ -1,6 +1,6 @@
 from datetime import datetime as dt
 
-from pydantic import BaseModel, ConfigDict, field_validator, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .validators import StringArrayValidator
 
@@ -8,8 +8,8 @@ from .validators import StringArrayValidator
 class CoreBase(BaseModel):
     name: str
     config: dict
-    exclude_inbound_tags: set
-    fallbacks_inbound_tags: set
+    exclude_inbound_tags: set[str]
+    fallbacks_inbound_tags: set[str]
 
     @property
     def exclude_tags(self) -> str:
