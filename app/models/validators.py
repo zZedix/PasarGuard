@@ -67,6 +67,13 @@ class ListValidator:
             raise ValueError(f"you must select at least one {name}")
         return list
 
+    @staticmethod
+    def remove_duplicates_preserve_order(list_: list) -> list:
+        """
+        Remove duplicates from list while preserving order using dict.fromkeys()
+        """
+        return list(dict.fromkeys(list_))
+
 
 class PasswordValidator:
     @staticmethod

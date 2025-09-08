@@ -3,7 +3,8 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.db.models import ProxyHostALPN, ProxyHostFingerprint, ProxyHostSecurity, UserStatus
-from .validators import StringArrayValidator
+
+from .validators import ListValidator, StringArrayValidator
 
 
 class XHttpModes(str, Enum):
@@ -179,14 +180,14 @@ class FormatVariables(dict):
 class BaseHost(BaseModel):
     id: int | None = Field(default=None)
     remark: str
-    address: set[str] = Field(default_factory=set)
+    address: list[str] = Field(default_factory=list)
     inbound_tag: str | None = Field(default=None)
     port: int | None = Field(default=None)
-    sni: set[str] | None = Field(default_factory=set)
-    host: set[str] | None = Field(default_factory=set)
+    sni: list[str] | None = Field(default_factory=list)
+    host: list[str] | None = Field(default_factory=list)
     path: str | None = Field(default=None)
     security: ProxyHostSecurity = ProxyHostSecurity.inbound_default
-    alpn: set[ProxyHostALPN] | None = Field(default_factory=set)
+    alpn: list[ProxyHostALPN] | None = Field(default_factory=list)
     fingerprint: ProxyHostFingerprint = ProxyHostFingerprint.none
     allowinsecure: bool | None = Field(default=None)
     is_disabled: bool = Field(default=False)
@@ -219,6 +220,15 @@ class CreateHost(BaseHost):
             raise ValueError("Invalid formatting variables")
 
         return v
+
+    @field_validator("alpn", "sni", "host", "address", mode="after")
+    def remove_duplicates(cls, v):
+        if v:
+            return ListValidator.remove_duplicates_preserve_order(v)
+
+    @field_validator("alpn", mode="after")
+    def sort_list(cls, v) -> list:
+        return sorted(v)
 
     @field_validator("address", mode="after")
     def validate_address(cls, v):
