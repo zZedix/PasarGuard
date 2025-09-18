@@ -180,11 +180,11 @@ class FormatVariables(dict):
 class BaseHost(BaseModel):
     id: int | None = Field(default=None)
     remark: str
-    address: list[str] = Field(default_factory=list)
+    address: set[str] = Field(default_factory=set)
     inbound_tag: str | None = Field(default=None)
     port: int | None = Field(default=None)
-    sni: list[str] | None = Field(default_factory=list)
-    host: list[str] | None = Field(default_factory=list)
+    sni: set[str] | None = Field(default_factory=set)
+    host: set[str] | None = Field(default_factory=set)
     path: str | None = Field(default=None)
     security: ProxyHostSecurity = ProxyHostSecurity.inbound_default
     alpn: list[ProxyHostALPN] | None = Field(default_factory=list)
@@ -221,7 +221,7 @@ class CreateHost(BaseHost):
 
         return v
 
-    @field_validator("alpn", "sni", "host", "address", mode="after")
+    @field_validator("alpn", mode="after")
     def remove_duplicates(cls, v):
         if v:
             return ListValidator.remove_duplicates_preserve_order(v)
