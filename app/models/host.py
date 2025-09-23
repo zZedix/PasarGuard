@@ -229,7 +229,8 @@ class CreateHost(BaseHost):
     @field_validator("alpn", mode="after")
     def sort_alpn_list(cls, v) -> list:
         priority = {"h3": 0, "h2": 1, "http/1.1": 2}
-        return sorted(v, key=lambda x: priority[x])
+        if v:
+            return sorted(v, key=lambda x: priority[x])
 
     @field_validator("address", mode="after")
     def validate_address(cls, v):
